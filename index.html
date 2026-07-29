@@ -44,6 +44,11 @@
                     <i class="fa-solid fa-campground text-primary text-xl md:text-2xl mr-2 md:mr-3 shrink-0"></i>
                     <h1 class="text-sm sm:text-lg md:text-2xl font-bold text-gray-900 leading-snug">จองห้องพักค่ายเสริมทักษะและการบูรณาการ ม.6 SMT & SME เทอมที่ 1/2569</h1>
                 </div>
+                <div class="flex items-center ml-2 sm:ml-4 shrink-0">
+                    <button onclick="toggleAdminMode()" id="adminBtn" class="text-gray-300 hover:text-gray-500 transition p-2" title="ผู้ดูแลระบบ">
+                        <i class="fa-solid fa-lock text-lg"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -187,6 +192,24 @@
                     <p class="text-gray-600 font-medium">ห้องพักนี้เต็มแล้ว</p>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-[60] flex items-center justify-center transition-opacity opacity-0">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 text-center transform scale-95 transition-transform duration-300" id="adminModalContent">
+            <div class="w-16 h-16 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-lock text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">โหมดผู้ดูแลระบบ</h3>
+            <p class="text-sm text-gray-500 mb-6">กรุณาใส่รหัสผ่านเพื่อปลดล็อคสิทธิ์การลบรายชื่อ</p>
+            
+            <input type="password" id="adminPassword" placeholder="รหัสผ่าน" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary focus:border-primary block p-3 outline-none transition mb-4 text-center text-xl tracking-widest font-mono">
+            
+            <div class="flex gap-3">
+                <button onclick="closeAdminModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg px-5 py-3 transition">ยกเลิก</button>
+                <button onclick="loginAdmin()" class="flex-1 bg-gray-800 hover:bg-black text-white font-medium rounded-lg px-5 py-3 transition">ยืนยัน</button>
             </div>
         </div>
     </div>

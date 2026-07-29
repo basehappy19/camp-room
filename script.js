@@ -17,6 +17,7 @@ let currentSelectedRoom = null;
 let currentPreviewStudent = null;
 let isFetching = false;
 let isBookingOpen = false;
+let isAdmin = false;
 
 // 31 ก.ค. 2569 เวลา 20:00:00 น. (GMT+7)
 const BOOKING_START_TIME = new Date('2026-07-31T20:00:00+07:00').getTime();
@@ -72,6 +73,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             initialLoader.classList.add('hidden');
         }, 500);
     }
+
+    // รองรับการกด Enter สำหรับรหัสผ่าน
+    const adminInput = document.getElementById('adminPassword');
+    if(adminInput) {
+        adminInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                loginAdmin();
+            }
+        });
+    }
 });
 
 // Load students from JSON
@@ -83,6 +94,53 @@ async function loadStudents() {
     } catch (error) {
         console.error("Error loading students data:", error);
         showToast("ไม่สามารถโหลดข้อมูลนักเรียนได้", "error");
+    }
+}
+
+// Admin Logic
+function toggleAdminMode() {
+    if (isAdmin) {
+        if(confirm("ต้องการออกจากโหมดผู้ดูแลระบบหรือไม่?")) {
+            isAdmin = false;
+            document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock text-lg"></i>';
+            document.getElementById('adminBtn').classList.replace('text-emerald-500', 'text-gray-300');
+            showToast("ออกจากระบบผู้ดูแลแล้ว", "success");
+            if(currentSelectedRoom) renderOccupants();
+        }
+    } else {
+        const modal = document.getElementById('adminModal');
+        const modalContent = document.getElementById('adminModalContent');
+        document.getElementById('adminPassword').value = '';
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.add('opacity-100');
+            modalContent.classList.remove('scale-95');
+            document.getElementById('adminPassword').focus();
+        }, 10);
+    }
+}
+
+function closeAdminModal() {
+    const modal = document.getElementById('adminModal');
+    const modalContent = document.getElementById('adminModalContent');
+    modal.classList.remove('opacity-100');
+    modalContent.classList.add('scale-95');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+function loginAdmin() {
+    const pass = document.getElementById('adminPassword').value;
+    if (pass === '23072551') {
+        isAdmin = true;
+        closeAdminModal();
+        document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
+        document.getElementById('adminBtn').classList.replace('text-gray-300', 'text-emerald-500');
+        showToast("เข้าสู่ระบบผู้ดูแลสำเร็จ", "success");
+        if(currentSelectedRoom) renderOccupants();
+    } else {
+        showToast("รหัสผ่านไม่ถูกต้อง", "error");
     }
 }
 
@@ -310,10 +368,15 @@ function renderOccupants() {
                         <i class="fa-solid ${genderIcon}"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-medium text-gray-800">${occ.PrefixTitle}${occ.FName} ${occ.LName}</p>
+                        <p class="font-bold text-gray-800">${occ.PrefixTitle}${occ.Name} ${occ.Surname}</p>
                         <p class="text-xs text-gray-500">รหัส: ${occ.StdNo} | ม.${occ.class}</p>
                     </div>
                 </div>
+                ${isAdmin ? `
+                <button onclick="removeOccupant('${occ.StdNo}')" class="text-red-400 hover:text-red-600 hover:bg-red-50 w-8 h-8 rounded-full transition flex items-center justify-center shrink-0 ml-2" title="ลบออก">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                ` : ''}
             </div>
         `;
     }).join('');
