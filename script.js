@@ -154,12 +154,7 @@ async function loginAdmin() {
             
         if (error) throw error;
         
-        let validPassword = '23072551'; // รหัสผ่านสำรองกรณีตารางว่างเปล่า
-        if (data && data.length > 0) {
-            validPassword = data[0].value;
-        }
-        
-        if (pass === validPassword) {
+        if (data && data.length > 0 && pass === data[0].value) {
             isAdmin = true;
             closeAdminModal();
             document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
