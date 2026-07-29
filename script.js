@@ -1,11 +1,5 @@
 // Configuration
-const CONFIG = {
-    TOTAL_DOUBLE_ROOMS: 24,
-    OCTUPLE_ROOMS: [
-        { id: 'O1', targetClass: '6/1' },
-        { id: 'O2', targetClass: '6/2' }
-    ]
-};
+// Rooms are now loaded from Supabase
 
 // ⚠️ ดึง URL และ Key ของ Supabase มาจากไฟล์ env.js
 const SUPABASE_URL = ENV.SUPABASE_URL;
@@ -61,8 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     initCountdown();
+    await loadRooms();
     await loadStudents();
-    initEmptyRooms();
     renderRoomSkeletons();
     
     // โหลดข้อมูลการจองจาก Supabase
@@ -107,6 +101,37 @@ async function loadStudents() {
     } catch (error) {
         console.error("Error loading students data:", error);
         showToast("ไม่สามารถโหลดข้อมูลนักเรียนได้: " + error.message, "error");
+    }
+}
+
+// Load rooms from Supabase
+async function loadRooms() {
+    try {
+        let { data, error } = await supabaseClient
+            .from('rooms')
+            .select('*');
+            
+        if (error) throw error;
+        
+        if (data) {
+            data.sort((a, b) => {
+                const numA = parseInt(a.id.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.id.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+            
+            rooms = data.map(r => ({
+                id: r.id,
+                title: r.title,
+                type: r.type,
+                capacity: r.capacity,
+                targetClass: r.target_class,
+                occupants: []
+            }));
+        }
+    } catch (error) {
+        console.error("Error loading rooms data:", error);
+        showToast("ไม่สามารถโหลดข้อมูลห้องได้: " + error.message, "error");
     }
 }
 
@@ -185,32 +210,7 @@ async function loginAdmin() {
 }
 
 // Initialize Empty Rooms Structure
-function initEmptyRooms() {
-    rooms = [];
-    
-    // Create 2 Octuple Rooms
-    CONFIG.OCTUPLE_ROOMS.forEach(r => {
-        rooms.push({
-            id: r.id,
-            title: `ห้องรวม ${r.targetClass}`,
-            type: 'octuple',
-            capacity: 8,
-            occupants: [],
-            targetClass: r.targetClass
-        });
-    });
 
-    // Create 24 Double Rooms
-    for (let i = 1; i <= CONFIG.TOTAL_DOUBLE_ROOMS; i++) {
-        rooms.push({
-            id: `D${i}`,
-            title: `ห้องคู่ ${i}`,
-            type: 'double',
-            capacity: 2,
-            occupants: []
-        });
-    }
-}
 
 // ดึงข้อมูลการจองทั้งหมดจาก Google Sheets
 async function fetchBookings() {
@@ -279,8 +279,8 @@ function renderRoomSkeletons() {
         octupleContainer.innerHTML += skeletonHTML;
     }
 
-    // 24 Double rooms
-    for (let i = 0; i < 24; i++) {
+    // 25 Double rooms
+    for (let i = 0; i < 25; i++) {
         doubleContainer.innerHTML += skeletonHTML;
     }
 }
