@@ -278,6 +278,8 @@ function renderRoomSkeletons() {
     }
 }
 
+let hasInitialRendered = false;
+
 // Render Rooms to DOM
 function renderRooms() {
     const doubleContainer = document.getElementById('double-rooms-container');
@@ -318,8 +320,11 @@ function renderRooms() {
                 : '<span class="bg-pink-100 text-pink-600 text-[11px] px-2 py-0.5 rounded-md flex items-center w-fit mt-1.5"><i class="fa-solid fa-venus mr-1"></i> ห้องหญิง</span>';
         }
 
+        const animClass = hasInitialRendered ? '' : 'animate-fade-in-up';
+        const animDelay = hasInitialRendered ? '' : `style="animation-delay: ${(index % 12) * 50}ms;"`;
+
         const roomHTML = `
-            <div onclick="openModal('${room.id}')" class="room-card ${stateClass} rounded-xl p-3 sm:p-4 cursor-pointer flex flex-col justify-between min-h-[8.5rem] relative overflow-hidden group animate-fade-in-up" style="animation-delay: ${(index % 12) * 50}ms;">
+            <div onclick="openModal('${room.id}')" class="room-card ${stateClass} rounded-xl p-3 sm:p-4 cursor-pointer flex flex-col justify-between min-h-[8.5rem] relative overflow-hidden group ${animClass}" ${animDelay}>
                 <div class="flex justify-between items-start gap-2">
                     <div class="flex-1">
                         <h4 class="font-bold text-gray-800 text-sm sm:text-base leading-tight">${room.title}</h4>
@@ -341,6 +346,8 @@ function renderRooms() {
             doubleContainer.innerHTML += roomHTML;
         }
     });
+    
+    hasInitialRendered = true;
 }
 
 // Modal Logic
