@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=5.0">
+    <link rel="stylesheet" href="style.css?v=6.0">
     
     <script>
         tailwind.config = {
@@ -100,12 +100,12 @@
             </div>
         </section>
 
-        <!-- ห้องคู่ 2 คน (24 ห้อง) -->
-        <section>
-            <div class="flex items-center mb-6 border-b pb-2">
-                <i class="fa-solid fa-user-group text-xl text-primary mr-2"></i>
-                <h3 class="text-xl font-semibold text-gray-800">ห้องพักคู่ (2 คน)</h3>
-                <span class="ml-3 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">ทั้งหมด 24 ห้อง</span>
+        <!-- ห้องคู่ 2 คน (25 ห้อง) -->
+        <section class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex items-center mb-6">
+                <div class="bg-blue-500 w-2 h-8 rounded-full mr-3"></div>
+                <h2 class="text-2xl font-bold text-gray-800">ห้องคู่ <span class="text-lg font-normal text-gray-500">(พัก 2 คน)</span></h2>
+                <span class="ml-3 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full" id="doubleRoomCountText">ทั้งหมด 25 ห้อง</span>
             </div>
             
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="double-rooms-container">
@@ -237,7 +237,7 @@
         <div id="toastMessage" class="ml-3 text-sm font-normal">Message</div>
     </div>
 
-    <script src="env.js?v=5.0"></script>
-    <script src="script.js?v=5.0"></script>
+    <script src="env.js?v=6.0"></script>
+    <script src="script.js?v=6.0"></script>
 </body>
 </html>
