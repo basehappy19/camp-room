@@ -461,6 +461,7 @@ function resetForm() {
     document.getElementById('studentError').classList.add('hidden');
     document.getElementById('studentPreview').classList.add('hidden');
     document.getElementById('confirmBookingBtn').disabled = true;
+    document.getElementById('confirmBookingBtn').classList.add('hidden');
     currentPreviewStudent = null;
 }
 
@@ -537,6 +538,7 @@ function searchStudent() {
 
     document.getElementById('studentPreview').classList.remove('hidden');
     document.getElementById('confirmBookingBtn').disabled = false;
+    document.getElementById('confirmBookingBtn').classList.remove('hidden');
 }
 
 function showError(msg) {
@@ -545,6 +547,7 @@ function showError(msg) {
     errorEl.classList.remove('hidden');
     document.getElementById('studentPreview').classList.add('hidden');
     document.getElementById('confirmBookingBtn').disabled = true;
+    document.getElementById('confirmBookingBtn').classList.add('hidden');
     currentPreviewStudent = null;
 }
 
