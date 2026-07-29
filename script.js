@@ -108,13 +108,13 @@ async function loadStudents() {
 // Admin Logic
 function toggleAdminMode() {
     if (isAdmin) {
-        if(confirm("ต้องการออกจากโหมดผู้ดูแลระบบหรือไม่?")) {
+        customConfirm("ออกจากระบบ", "ต้องการออกจากโหมดผู้ดูแลระบบหรือไม่?", "info", () => {
             isAdmin = false;
             document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock text-lg"></i>';
             document.getElementById('adminBtn').classList.replace('text-emerald-500', 'text-gray-300');
             showToast("ออกจากระบบผู้ดูแลแล้ว", "success");
             if(currentSelectedRoom) renderOccupants();
-        }
+        });
     } else {
         const modal = document.getElementById('adminModal');
         const modalContent = document.getElementById('adminModalContent');
@@ -569,31 +569,31 @@ async function confirmBooking() {
 
 // ลบผู้จองออกจาก Supabase
 async function removeOccupant(stdNo) {
-    if (!confirm("ต้องการลบรายชื่อนี้ออกจากห้องพักหรือไม่?")) return;
     if (isFetching) {
         showToast("ระบบกำลังอัปเดตข้อมูล กรุณารอสักครู่แล้วลองใหม่", "error");
         return;
     }
-    
-    showLoading(true);
-    
-    try {
-        const { error } = await supabaseClient
-            .from('bookings')
-            .delete()
-            .eq('room_id', currentSelectedRoom.id)
-            .eq('std_no', stdNo);
+
+    customConfirm("ยืนยันการลบ", "ต้องการลบรายชื่อนี้ออกจากห้องพักหรือไม่?", "danger", async () => {
+        showLoading(true);
+        try {
+            const { error } = await supabaseClient
+                .from('bookings')
+                .delete()
+                .eq('room_id', currentSelectedRoom.id)
+                .eq('std_no', stdNo);
+                
+            if (error) throw error;
             
-        if (error) throw error;
-        
-        await fetchBookings(); // อัปเดตข้อมูลใหม่ทั้งหมด
-        showToast("ลบรายชื่อสำเร็จ", "success");
-    } catch (error) {
-        console.error("Unbook error:", error);
-        showToast("ไม่สามารถลบข้อมูลได้: " + error.message, "error");
-    } finally {
-        showLoading(false);
-    }
+            await fetchBookings(); // อัปเดตข้อมูลใหม่ทั้งหมด
+            showToast("ลบรายชื่อสำเร็จ", "success");
+        } catch (error) {
+            console.error("Unbook error:", error);
+            showToast("ไม่สามารถลบข้อมูลได้: " + error.message, "error");
+        } finally {
+            showLoading(false);
+        }
+    });
 }
 
 // UI Utilities
@@ -633,6 +633,51 @@ function showToast(message, type = "success") {
     toastTimeout = setTimeout(() => {
         toast.classList.add('translate-y-20', 'opacity-0');
     }, 3000);
+}
+
+let confirmCallback = null;
+
+function customConfirm(title, text, type, onConfirm) {
+    document.getElementById('confirmModalTitle').innerText = title;
+    document.getElementById('confirmModalText').innerText = text;
+    
+    const iconDiv = document.getElementById('confirmModalIcon');
+    const yesBtn = document.getElementById('confirmModalYesBtn');
+    
+    if (type === 'danger') {
+        iconDiv.className = 'w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4';
+        yesBtn.className = 'flex-1 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg px-5 py-3 transition-all duration-200 active:scale-95';
+        iconDiv.innerHTML = '<i class="fa-solid fa-trash-can text-2xl"></i>';
+    } else {
+        iconDiv.className = 'w-16 h-16 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4';
+        yesBtn.className = 'flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg px-5 py-3 transition-all duration-200 active:scale-95';
+        iconDiv.innerHTML = '<i class="fa-solid fa-circle-question text-2xl"></i>';
+    }
+
+    confirmCallback = onConfirm;
+    
+    yesBtn.onclick = function() {
+        closeConfirmModal();
+        if (confirmCallback) confirmCallback();
+    };
+
+    const modal = document.getElementById('confirmModal');
+    const modalContent = document.getElementById('confirmModalContent');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('scale-95');
+    }, 10);
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    const modalContent = document.getElementById('confirmModalContent');
+    modal.classList.remove('opacity-100');
+    modalContent.classList.add('scale-95');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
 }
 
 document.getElementById('studentId')?.addEventListener('keypress', function (e) {
