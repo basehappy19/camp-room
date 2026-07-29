@@ -67,14 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast("กรุณาใส่ URL ของ Supabase ในไฟล์ env.js", "error");
     }
 
-    // ปิดหน้าจอ Loading เมื่อโหลดเสร็จ
-    const initialLoader = document.getElementById('initial-loader');
-    if (initialLoader) {
-        initialLoader.classList.add('opacity-0');
-        setTimeout(() => {
-            initialLoader.classList.add('hidden');
-        }, 500);
-    }
 
     // รองรับการกด Enter สำหรับรหัสผ่าน
     const adminInput = document.getElementById('adminPassword');
@@ -157,11 +149,11 @@ async function loginAdmin() {
             .from('settings')
             .select('value')
             .eq('key', 'admin_password')
-            .single();
+            .limit(1);
             
         if (error) throw error;
         
-        if (data && pass === data.value) {
+        if (data && data.length > 0 && pass === data[0].value) {
             isAdmin = true;
             closeAdminModal();
             document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
