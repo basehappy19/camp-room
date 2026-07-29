@@ -154,7 +154,7 @@ async function loginAdmin() {
             
         if (error) throw error;
         
-        if (data && data.length > 0 && pass === data[0].value) {
+        if (data && data.length > 0 && pass.trim() === data[0].value.trim()) {
             isAdmin = true;
             closeAdminModal();
             document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
