@@ -10,7 +10,7 @@ const CONFIG = {
 // ⚠️ ดึง URL และ Key ของ Supabase มาจากไฟล์ env.js
 const SUPABASE_URL = ENV.SUPABASE_URL;
 const SUPABASE_ANON_KEY = ENV.SUPABASE_ANON_KEY;
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // State
 let studentsData = [];
@@ -178,7 +178,7 @@ function initEmptyRooms() {
 async function fetchBookings() {
     try {
         showLoading(true);
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('bookings')
             .select('*');
             
@@ -487,7 +487,7 @@ async function confirmBooking() {
     showLoading(true);
     
     try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('bookings')
             .insert([
                 { room_id: currentSelectedRoom.id, std_no: currentPreviewStudent.StdNo }
@@ -518,7 +518,7 @@ async function removeOccupant(stdNo) {
     showLoading(true);
     
     try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('bookings')
             .delete()
             .eq('room_id', currentSelectedRoom.id)
