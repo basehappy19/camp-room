@@ -141,12 +141,21 @@ async function fetchBookings() {
             if (currentSelectedRoom) {
                 renderOccupants();
                 document.getElementById('occupancyCount').innerText = currentSelectedRoom.occupants.length;
-                if (currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity) {
-                    document.getElementById('bookingFormSection').classList.add('hidden');
-                    document.getElementById('roomFullMessage').classList.remove('hidden');
+                
+                // เช็คว่าห้องเต็มหรือยัง และยังไม่เปิดให้จอง
+                if (isBookingOpen) {
+                    if (currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity) {
+                        document.getElementById('bookingFormSection').classList.add('hidden');
+                        document.getElementById('roomFullMessage').classList.remove('hidden');
+                    } else {
+                        document.getElementById('bookingFormSection').classList.remove('hidden');
+                        document.getElementById('roomFullMessage').classList.add('hidden');
+                    }
+                    document.getElementById('notOpenMessage').classList.add('hidden');
                 } else {
-                    document.getElementById('bookingFormSection').classList.remove('hidden');
+                    document.getElementById('bookingFormSection').classList.add('hidden');
                     document.getElementById('roomFullMessage').classList.add('hidden');
+                    document.getElementById('notOpenMessage').classList.remove('hidden');
                 }
             }
         } else {
