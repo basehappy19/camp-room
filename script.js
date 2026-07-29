@@ -7,8 +7,10 @@ const CONFIG = {
     ]
 };
 
-// ⚠️ ให้ผู้ใช้เอา URL ของ Google Apps Script มาใส่ตรงนี้
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-rP1rpRM7qe4lyo8EJQ1r7owEx2jvhggzxeWChAl6lorRnMrQnRICILEs9xdpccuF/exec';
+// ⚠️ ให้ผู้ใช้เอา URL และ Key ของ Supabase มาใส่ตรงนี้
+const SUPABASE_URL = 'ใส่_SUPABASE_URL_ของคุณที่นี่';
+const SUPABASE_ANON_KEY = 'ใส่_SUPABASE_ANON_KEY_ของคุณที่นี่';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // State
 let studentsData = [];
@@ -176,52 +178,53 @@ function initEmptyRooms() {
 async function fetchBookings() {
     try {
         showLoading(true);
-        const response = await fetch(WEB_APP_URL);
-        const result = await response.json();
-        
-        if (result.success) {
-            // เคลียร์คนออกให้หมดก่อน
-            rooms.forEach(r => r.occupants = []);
+        const { data, error } = await supabase
+            .from('bookings')
+            .select('*');
             
-            // จับคู่ข้อมูลการจองกับข้อมูลนักเรียน
-            result.data.forEach(booking => {
-                const room = rooms.find(r => r.id === booking.roomId);
-                const student = studentsData.find(s => s.StdNo === booking.stdNo);
+        if (error) throw error;
+        
+        // เคลียร์คนออกให้หมดก่อน
+        rooms.forEach(r => r.occupants = []);
+        
+        // จับคู่ข้อมูลการจองกับข้อมูลนักเรียน
+        if (data) {
+            data.forEach(booking => {
+                const room = rooms.find(r => r.id === booking.room_id);
+                const student = studentsData.find(s => s.StdNo === booking.std_no);
                 
                 if (room && student) {
                     room.occupants.push(student);
                 }
             });
+        }
+        
+        renderRooms();
+        
+        // ถ้า Modal เปิดอยู่ ให้อัปเดตข้อมูลใน Modal ด้วย
+        if (currentSelectedRoom) {
+            renderOccupants();
+            document.getElementById('occupancyCount').innerText = currentSelectedRoom.occupants.length;
             
-            renderRooms();
-            
-            // ถ้า Modal เปิดอยู่ ให้อัปเดตข้อมูลใน Modal ด้วย
-            if (currentSelectedRoom) {
-                renderOccupants();
-                document.getElementById('occupancyCount').innerText = currentSelectedRoom.occupants.length;
-                
-                // เช็คว่าห้องเต็มหรือยัง และยังไม่เปิดให้จอง
-                if (isBookingOpen) {
-                    if (currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity) {
-                        document.getElementById('bookingFormSection').classList.add('hidden');
-                        document.getElementById('roomFullMessage').classList.remove('hidden');
-                    } else {
-                        document.getElementById('bookingFormSection').classList.remove('hidden');
-                        document.getElementById('roomFullMessage').classList.add('hidden');
-                    }
-                    document.getElementById('notOpenMessage').classList.add('hidden');
-                } else {
+            // เช็คว่าห้องเต็มหรือยัง และยังไม่เปิดให้จอง
+            if (isBookingOpen) {
+                if (currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity) {
                     document.getElementById('bookingFormSection').classList.add('hidden');
+                    document.getElementById('roomFullMessage').classList.remove('hidden');
+                } else {
+                    document.getElementById('bookingFormSection').classList.remove('hidden');
                     document.getElementById('roomFullMessage').classList.add('hidden');
-                    document.getElementById('notOpenMessage').classList.remove('hidden');
                 }
+                document.getElementById('notOpenMessage').classList.add('hidden');
+            } else {
+                document.getElementById('bookingFormSection').classList.add('hidden');
+                document.getElementById('roomFullMessage').classList.add('hidden');
+                document.getElementById('notOpenMessage').classList.remove('hidden');
             }
-        } else {
-            showToast("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + result.error, "error");
         }
     } catch (error) {
         console.error("Error fetching bookings:", error);
-        showToast("ข้อผิดพลาด: " + error.message, "error");
+        showToast("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error.message, "error");
     } finally {
         showLoading(false);
     }
@@ -298,7 +301,7 @@ function openModal(roomId) {
     if (!currentSelectedRoom) return;
 
     // ดึงข้อมูลใหม่ก่อนเปิดให้ชัวร์
-    if(!isFetching && WEB_APP_URL !== 'ใส่_URL_ของ_GOOGLE_APPS_SCRIPT_ที่นี่') {
+    if(!isFetching && SUPABASE_URL !== 'ใส่_SUPABASE_URL_ของคุณที่นี่') {
         fetchBookings();
     }
 
@@ -474,7 +477,7 @@ function showError(msg) {
     currentPreviewStudent = null;
 }
 
-// ยืนยันการจอง ส่งข้อมูลไป Google Sheets
+// ยืนยันการจอง ส่งข้อมูลไป Supabase
 async function confirmBooking() {
     if (!currentPreviewStudent || !currentSelectedRoom || isFetching) return;
     
@@ -484,36 +487,27 @@ async function confirmBooking() {
     showLoading(true);
     
     try {
-        const payload = {
-            action: 'book',
-            roomId: currentSelectedRoom.id,
-            stdNo: currentPreviewStudent.StdNo
-        };
+        const { error } = await supabase
+            .from('bookings')
+            .insert([
+                { room_id: currentSelectedRoom.id, std_no: currentPreviewStudent.StdNo }
+            ]);
+            
+        if (error) throw error;
         
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            await fetchBookings(); // อัปเดตข้อมูลใหม่ทั้งหมด
-            resetForm();
-            showToast("เพิ่มรายชื่อเข้าห้องพักสำเร็จ!");
-        } else {
-            showToast("เกิดข้อผิดพลาด: " + result.error, "error");
-        }
+        await fetchBookings(); // อัปเดตข้อมูลใหม่ทั้งหมด
+        resetForm();
+        showToast("เพิ่มรายชื่อเข้าห้องพักสำเร็จ!");
     } catch (error) {
         console.error("Booking error:", error);
-        showToast("ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่", "error");
+        showToast("ไม่สามารถบันทึกข้อมูลได้: " + error.message, "error");
     } finally {
         btn.innerHTML = 'ยืนยันการเข้าพัก';
         showLoading(false);
     }
 }
 
-// ลบผู้จองออกจาก Google Sheets
+// ลบผู้จองออกจาก Supabase
 async function removeOccupant(stdNo) {
     if (!confirm("ต้องการลบรายชื่อนี้ออกจากห้องพักหรือไม่?")) return;
     if (isFetching) {
@@ -524,28 +518,19 @@ async function removeOccupant(stdNo) {
     showLoading(true);
     
     try {
-        const payload = {
-            action: 'unbook',
-            roomId: currentSelectedRoom.id,
-            stdNo: stdNo
-        };
+        const { error } = await supabase
+            .from('bookings')
+            .delete()
+            .eq('room_id', currentSelectedRoom.id)
+            .eq('std_no', stdNo);
+            
+        if (error) throw error;
         
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            await fetchBookings(); // อัปเดตข้อมูลใหม่ทั้งหมด
-            showToast("ลบรายชื่อสำเร็จ", "success");
-        } else {
-            showToast("เกิดข้อผิดพลาด: " + result.error, "error");
-        }
+        await fetchBookings(); // อัปเดตข้อมูลใหม่ทั้งหมด
+        showToast("ลบรายชื่อสำเร็จ", "success");
     } catch (error) {
         console.error("Unbook error:", error);
-        showToast("ไม่สามารถลบข้อมูลได้ กรุณาลองใหม่", "error");
+        showToast("ไม่สามารถลบข้อมูลได้: " + error.message, "error");
     } finally {
         showLoading(false);
     }
