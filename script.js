@@ -151,6 +151,7 @@ function toggleAdminMode() {
         const modalContent = document.getElementById('adminModalContent');
         document.getElementById('adminPassword').value = '';
         modal.classList.remove('hidden');
+        updateBodyScroll();
         setTimeout(() => {
             modal.classList.add('opacity-100');
             modalContent.classList.remove('scale-95');
@@ -166,6 +167,7 @@ function closeAdminModal() {
     modalContent.classList.add('scale-95');
     setTimeout(() => {
         modal.classList.add('hidden');
+        updateBodyScroll();
     }, 300);
 }
 
@@ -400,6 +402,7 @@ function openModal(roomId) {
     const modal = document.getElementById('bookingModal');
     const modalContent = document.getElementById('bookingModalContent');
     modal.classList.remove('hidden');
+    updateBodyScroll();
     setTimeout(() => {
         modal.classList.add('modal-animate-in');
         modalContent.classList.add('modal-content-animate-in');
@@ -416,6 +419,7 @@ function closeModal() {
         modal.classList.add('hidden');
         currentSelectedRoom = null;
         resetForm();
+        updateBodyScroll();
     }, 300);
 }
 
@@ -671,6 +675,7 @@ function customConfirm(title, text, type, onConfirm) {
     const modal = document.getElementById('confirmModal');
     const modalContent = document.getElementById('confirmModalContent');
     modal.classList.remove('hidden');
+    updateBodyScroll();
     setTimeout(() => {
         modal.classList.add('opacity-100');
         modalContent.classList.remove('scale-95');
@@ -684,7 +689,25 @@ function closeConfirmModal() {
     modalContent.classList.add('scale-95');
     setTimeout(() => {
         modal.classList.add('hidden');
+        updateBodyScroll();
     }, 300);
+}
+
+function updateBodyScroll() {
+    const modals = ['bookingModal', 'adminModal', 'confirmModal'];
+    let isAnyOpen = false;
+    for (let id of modals) {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains('hidden')) {
+            isAnyOpen = true;
+            break;
+        }
+    }
+    if (isAnyOpen) {
+        document.body.classList.add('overflow-hidden');
+    } else {
+        document.body.classList.remove('overflow-hidden');
+    }
 }
 
 document.getElementById('studentId')?.addEventListener('keypress', function (e) {
