@@ -59,12 +59,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadStudents();
     initEmptyRooms();
     
-    // โหลดข้อมูลการจองจาก Google Sheets
-    if(WEB_APP_URL !== 'ใส่_URL_ของ_GOOGLE_APPS_SCRIPT_ที่นี่') {
+    // โหลดข้อมูลการจองจาก Supabase
+    if(SUPABASE_URL) {
         await fetchBookings();
     } else {
         renderRooms();
-        showToast("กรุณาใส่ Web App URL ในไฟล์ script.js", "error");
+        showToast("กรุณาใส่ URL ของ Supabase ในไฟล์ env.js", "error");
     }
 
     // ปิดหน้าจอ Loading เมื่อโหลดเสร็จ
