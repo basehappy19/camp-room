@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Load students from Supabase (with auto-migration)
+// Load students from Supabase
 async function loadStudents() {
     try {
         let { data, error } = await supabaseClient
@@ -96,46 +96,16 @@ async function loadStudents() {
             
         if (error) throw error;
         
-        // ถ้ายังไม่มีข้อมูลใน Supabase ให้ย้ายจาก JSON ให้อัตโนมัติ
-        if (!data || data.length === 0) {
-            showToast("กำลังย้ายข้อมูลนักเรียนขึ้นฐานข้อมูล...", "success");
-            const response = await fetch('students.json');
-            if (!response.ok) throw new Error('Network response was not ok');
-            const jsonData = await response.json();
-            
-            // Map JSON keys to Postgres standard columns
-            const mappedData = jsonData.map(s => ({
-                std_no: s.StdNo,
-                prefix_title: s.PrefixTitle,
-                fname: s.FName,
-                lname: s.LName,
-                class_room: s.class
-            }));
-            
-            const { error: insertError } = await supabaseClient
-                .from('students')
-                .insert(mappedData);
-                
-            if (insertError) throw insertError;
-            
-            // ดึงข้อมูลใหม่อีกรอบ
-            const { data: newData, error: fetchError } = await supabaseClient
-                .from('students')
-                .select('*');
-                
-            if (fetchError) throw fetchError;
-            data = newData;
-            showToast("ย้ายข้อมูลนักเรียนเสร็จสิ้น!", "success");
-        }
-        
         // Map back to original keys so we don't break existing code
-        studentsData = data.map(s => ({
-            StdNo: s.std_no,
-            PrefixTitle: s.prefix_title,
-            FName: s.fname,
-            LName: s.lname,
-            class: s.class_room
-        }));
+        if (data) {
+            studentsData = data.map(s => ({
+                StdNo: s.std_no,
+                PrefixTitle: s.prefix_title,
+                FName: s.fname,
+                LName: s.lname,
+                class: s.class_room
+            }));
+        }
     } catch (error) {
         console.error("Error loading students data:", error);
         showToast("ไม่สามารถโหลดข้อมูลนักเรียนได้: " + error.message, "error");
