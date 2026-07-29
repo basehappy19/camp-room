@@ -1,0 +1,76 @@
+/* Custom Styles & Micro-animations */
+
+body {
+    /* Subtle background pattern */
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Room Cards */
+.room-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+.room-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.room-card:active {
+    transform: translateY(0);
+}
+
+/* Room States */
+.room-empty {
+    background-color: white;
+    border-color: #e5e7eb;
+}
+
+.room-empty:hover {
+    border-color: #10b981; /* Primary hover */
+}
+
+.room-partial {
+    background-color: #fefce8; /* yellow-50 */
+    border-color: #fde047; /* yellow-300 */
+}
+
+.room-full {
+    background-color: #f3f4f6; /* gray-100 */
+    border-color: #d1d5db; /* gray-300 */
+    opacity: 0.8;
+}
+
+/* Modal Animation Classes */
+.modal-show {
+    display: flex !important;
+}
+
+.modal-animate-in {
+    opacity: 1 !important;
+}
+
+.modal-content-animate-in {
+    transform: scale(1) !important;
+}
+
+/* Hide scrollbar for occupants list if it gets too long */
+#currentOccupants {
+    max-height: 200px;
+    overflow-y: auto;
+}
+#currentOccupants::-webkit-scrollbar {
+    width: 6px;
+}
+#currentOccupants::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 4px;
+}
+#currentOccupants::-webkit-scrollbar-thumb {
+    background: #c1c1c1; 
+    border-radius: 4px;
+}
+#currentOccupants::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8; 
+}

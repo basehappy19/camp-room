@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camp Room Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#10b981', // emerald-500
+                        secondary: '#0f766e', // teal-700
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800 font-sans">
+
+    <!-- Initial Loading Overlay -->
+    <div id="initial-loader" class="fixed inset-0 bg-gray-50 z-[100] flex flex-col items-center justify-center transition-opacity duration-500">
+        <i class="fa-solid fa-circle-notch fa-spin text-primary text-5xl mb-4"></i>
+        <h2 class="text-xl font-semibold text-gray-700 mt-2">กำลังดึงข้อมูลห้องพักล่าสุด...</h2>
+        <p class="text-sm text-gray-500 mt-1">กรุณารอสักครู่</p>
+    </div>
+    
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-campground text-primary text-2xl mr-3"></i>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">จองห้องพักค่ายเสริมทักษะและการบูรณาการ ม.6 SMT & SME เทอมที่ 1/2569</h1>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div class="mb-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">เลือกห้องพัก</h2>
+            <p class="text-gray-500">กรุณาคลิกที่ห้องพักเพื่อทำการจองหรือดูรายชื่อผู้เข้าพัก</p>
+            
+            <div class="flex justify-center items-center mt-4 gap-6 text-sm">
+                <div class="flex items-center"><span class="w-4 h-4 rounded-full bg-white border-2 border-primary mr-2"></span> ว่าง</div>
+                <div class="flex items-center"><span class="w-4 h-4 rounded-full bg-yellow-50 border-2 border-yellow-300 mr-2"></span> มีผู้จองแล้ว (ยังไม่เต็ม)</div>
+                <div class="flex items-center"><span class="w-4 h-4 rounded-full bg-gray-200 border-2 border-gray-400 mr-2"></span> เต็มแล้ว</div>
+            </div>
+        </div>
+
+        <!-- ห้องรวม 8 คน (2 ห้อง) -->
+        <section class="mb-12">
+            <div class="flex items-center mb-6 border-b pb-2">
+                <i class="fa-solid fa-people-group text-xl text-primary mr-2"></i>
+                <h3 class="text-xl font-semibold text-gray-800">ห้องพักรวม (8 คน)</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="octuple-rooms-container">
+                <!-- ห้องจะถูกสร้างด้วย JS -->
+            </div>
+        </section>
+
+        <!-- ห้องคู่ 2 คน (24 ห้อง) -->
+        <section>
+            <div class="flex items-center mb-6 border-b pb-2">
+                <i class="fa-solid fa-user-group text-xl text-primary mr-2"></i>
+                <h3 class="text-xl font-semibold text-gray-800">ห้องพักคู่ (2 คน)</h3>
+                <span class="ml-3 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">ทั้งหมด 24 ห้อง</span>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="double-rooms-container">
+                <!-- ห้องจะถูกสร้างด้วย JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal สำหรับจองห้อง -->
+    <div id="bookingModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center transition-opacity opacity-0">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl mx-4 transform scale-95 transition-transform duration-300" id="bookingModalContent">
+            
+            <!-- Modal Header -->
+            <div class="px-8 py-5 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h3 class="text-xl font-bold text-gray-800" id="modalRoomTitle">จองห้องพัก</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition p-2">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-8">
+                
+                <!-- แสดงรายชื่อคนในห้อง -->
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">ผู้เข้าพักปัจจุบัน (<span id="occupancyCount">0</span>/<span id="maxCapacity">2</span>)</h4>
+                    <div id="currentOccupants" class="space-y-2">
+                        <!-- รายชื่อผู้เข้าพัก (สร้างด้วย JS) -->
+                    </div>
+                </div>
+
+                <hr class="mb-6 border-gray-100">
+
+                <!-- ฟอร์มจอง -->
+                <div id="bookingFormSection">
+                    <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">เพิ่มผู้เข้าพักใหม่</h4>
+                    
+                    <div class="mb-5 relative">
+                        <label for="studentId" class="block text-base font-medium text-gray-700 mb-2">รหัสนักเรียน</label>
+                        <div class="flex">
+                            <input type="text" id="studentId" placeholder="กรอกรหัสนักเรียน 5 หลัก" class="flex-1 bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-l-lg focus:ring-primary focus:border-primary block w-full p-4 outline-none transition" maxlength="5">
+                            <button onclick="searchStudent()" class="bg-primary hover:bg-emerald-600 text-white px-6 rounded-r-lg transition text-lg font-medium">
+                                <i class="fa-solid fa-magnifying-glass"></i> ตรวจสอบ
+                            </button>
+                        </div>
+                        <p id="studentError" class="text-red-500 text-sm mt-2 hidden"></p>
+                    </div>
+
+                    <!-- ข้อมูลนักเรียนที่ค้นเจอ -->
+                    <div id="studentPreview" class="hidden bg-emerald-50 border border-emerald-100 rounded-lg p-5 mb-5">
+                        <div class="flex items-start">
+                            <div class="bg-white p-3 rounded-full shadow-sm mr-4">
+                                <i class="fa-solid fa-user text-emerald-500 text-2xl" id="studentGenderIcon"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-gray-800 text-lg" id="studentNamePreview">ชื่อ - นามสกุล</h5>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    <span id="studentClassPreview" class="bg-gray-200 px-2 py-1 rounded mr-1">ชั้น</span>
+                                    <span id="studentGenderPreview" class="bg-gray-200 px-2 py-1 rounded">เพศ</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="confirmBookingBtn" onclick="confirmBooking()" disabled class="w-full text-white bg-primary hover:bg-emerald-600 focus:ring-4 focus:outline-none focus:ring-emerald-300 font-medium rounded-lg text-lg px-5 py-4 text-center transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center mt-2">
+                        ยืนยันการเข้าพัก
+                    </button>
+                </div>
+                
+                <!-- ข้อความกรณีห้องเต็ม -->
+                <div id="roomFullMessage" class="hidden text-center py-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <i class="fa-solid fa-lock text-gray-400 text-2xl mb-2"></i>
+                    <p class="text-gray-600 font-medium">ห้องพักนี้เต็มแล้ว</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 flex items-center w-full max-w-xs p-4 space-x-3 text-gray-500 bg-white rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-gray-100">
+        <div id="toastIcon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <div id="toastMessage" class="ml-3 text-sm font-normal">Message</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
