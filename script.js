@@ -7,9 +7,9 @@ const CONFIG = {
     ]
 };
 
-// ⚠️ ให้ผู้ใช้เอา URL และ Key ของ Supabase มาใส่ตรงนี้
-const SUPABASE_URL = 'ใส่_SUPABASE_URL_ของคุณที่นี่';
-const SUPABASE_ANON_KEY = 'ใส่_SUPABASE_ANON_KEY_ของคุณที่นี่';
+// ⚠️ ดึง URL และ Key ของ Supabase มาจากไฟล์ env.js
+const SUPABASE_URL = ENV.SUPABASE_URL;
+const SUPABASE_ANON_KEY = ENV.SUPABASE_ANON_KEY;
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // State
@@ -301,7 +301,7 @@ function openModal(roomId) {
     if (!currentSelectedRoom) return;
 
     // ดึงข้อมูลใหม่ก่อนเปิดให้ชัวร์
-    if(!isFetching && SUPABASE_URL !== 'ใส่_SUPABASE_URL_ของคุณที่นี่') {
+    if(!isFetching && SUPABASE_URL) {
         fetchBookings();
     }
 
