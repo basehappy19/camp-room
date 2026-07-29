@@ -145,17 +145,42 @@ function closeAdminModal() {
     }, 300);
 }
 
-function loginAdmin() {
+async function loginAdmin() {
     const pass = document.getElementById('adminPassword').value;
-    if (pass === '23072551') {
-        isAdmin = true;
-        closeAdminModal();
-        document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
-        document.getElementById('adminBtn').classList.replace('text-gray-300', 'text-emerald-500');
-        showToast("เข้าสู่ระบบผู้ดูแลสำเร็จ", "success");
-        if(currentSelectedRoom) renderOccupants();
-    } else {
-        showToast("รหัสผ่านไม่ถูกต้อง", "error");
+    const btn = document.querySelector('#adminModalContent button:last-child');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    
+    try {
+        const { data, error } = await supabaseClient
+            .from('settings')
+            .select('value')
+            .eq('key', 'admin_password')
+            .single();
+            
+        if (error) throw error;
+        
+        if (data && pass === data.value) {
+            isAdmin = true;
+            closeAdminModal();
+            document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
+            document.getElementById('adminBtn').classList.replace('text-gray-300', 'text-emerald-500');
+            showToast("เข้าสู่ระบบผู้ดูแลสำเร็จ", "success");
+            
+            if(currentSelectedRoom) {
+                renderOccupants();
+                updateBookingFormVisibility();
+            }
+        } else {
+            showToast("รหัสผ่านไม่ถูกต้อง", "error");
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        showToast("เกิดข้อผิดพลาดในการตรวจสอบรหัสผ่าน", "error");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
 }
 
@@ -218,22 +243,7 @@ async function fetchBookings() {
         if (currentSelectedRoom) {
             renderOccupants();
             document.getElementById('occupancyCount').innerText = currentSelectedRoom.occupants.length;
-            
-            // เช็คว่าห้องเต็มหรือยัง และยังไม่เปิดให้จอง
-            if (isBookingOpen) {
-                if (currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity) {
-                    document.getElementById('bookingFormSection').classList.add('hidden');
-                    document.getElementById('roomFullMessage').classList.remove('hidden');
-                } else {
-                    document.getElementById('bookingFormSection').classList.remove('hidden');
-                    document.getElementById('roomFullMessage').classList.add('hidden');
-                }
-                document.getElementById('notOpenMessage').classList.add('hidden');
-            } else {
-                document.getElementById('bookingFormSection').classList.add('hidden');
-                document.getElementById('roomFullMessage').classList.add('hidden');
-                document.getElementById('notOpenMessage').classList.remove('hidden');
-            }
+            updateBookingFormVisibility();
         }
     } catch (error) {
         console.error("Error fetching bookings:", error);
@@ -309,6 +319,26 @@ function renderRooms() {
 }
 
 // Modal Logic
+function updateBookingFormVisibility() {
+    if (!currentSelectedRoom) return;
+    
+    // เช็คว่าห้องเต็มหรือยัง และถึงเวลาจองหรือเป็น Admin หรือไม่
+    if (isBookingOpen || isAdmin) {
+        if (currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity) {
+            document.getElementById('bookingFormSection').classList.add('hidden');
+            document.getElementById('roomFullMessage').classList.remove('hidden');
+        } else {
+            document.getElementById('bookingFormSection').classList.remove('hidden');
+            document.getElementById('roomFullMessage').classList.add('hidden');
+        }
+        document.getElementById('notOpenMessage').classList.add('hidden');
+    } else {
+        document.getElementById('bookingFormSection').classList.add('hidden');
+        document.getElementById('roomFullMessage').classList.add('hidden');
+        document.getElementById('notOpenMessage').classList.remove('hidden');
+    }
+}
+
 function openModal(roomId) {
     currentSelectedRoom = rooms.find(r => r.id === roomId);
     if (!currentSelectedRoom) return;
@@ -325,22 +355,7 @@ function openModal(roomId) {
     
     renderOccupants();
     resetForm();
-
-    // จัดการแสดงผลฟอร์มจอง หรือ แจ้งเตือนยังไม่เปิด
-    if (isBookingOpen) {
-        if (currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity) {
-            document.getElementById('bookingFormSection').classList.add('hidden');
-            document.getElementById('roomFullMessage').classList.remove('hidden');
-        } else {
-            document.getElementById('bookingFormSection').classList.remove('hidden');
-            document.getElementById('roomFullMessage').classList.add('hidden');
-        }
-        document.getElementById('notOpenMessage').classList.add('hidden');
-    } else {
-        document.getElementById('bookingFormSection').classList.add('hidden');
-        document.getElementById('roomFullMessage').classList.add('hidden');
-        document.getElementById('notOpenMessage').classList.remove('hidden');
-    }
+    updateBookingFormVisibility();
 
     // Show Modal
     const modal = document.getElementById('bookingModal');
