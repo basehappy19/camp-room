@@ -157,7 +157,7 @@
                         <label for="studentId" class="block text-base font-medium text-gray-700 mb-2">รหัสนักเรียน</label>
                         <div class="flex">
                             <input type="text" id="studentId" placeholder="กรอกรหัสนักเรียน 5 หลัก" class="flex-1 bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-l-lg focus:ring-primary focus:border-primary block w-full p-4 outline-none transition" maxlength="5">
-                            <button onclick="searchStudent()" class="bg-primary hover:bg-emerald-600 text-white px-6 rounded-r-lg transition text-lg font-medium">
+                            <button onclick="searchStudent()" class="bg-primary hover:bg-emerald-600 text-white px-6 rounded-r-lg transition-all duration-200 active:scale-95 text-lg font-medium">
                                 <i class="fa-solid fa-magnifying-glass"></i> ตรวจสอบ
                             </button>
                         </div>
@@ -180,7 +180,7 @@
                         </div>
                     </div>
                     
-                    <button id="confirmBookingBtn" onclick="confirmBooking()" disabled class="w-full text-white bg-primary hover:bg-emerald-600 focus:ring-4 focus:outline-none focus:ring-emerald-300 font-medium rounded-lg text-lg px-5 py-4 text-center transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center mt-2">
+                    <button id="confirmBookingBtn" onclick="confirmBooking()" disabled class="w-full text-white bg-primary hover:bg-emerald-600 focus:ring-4 focus:outline-none focus:ring-emerald-300 font-medium rounded-lg text-lg px-5 py-4 text-center transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex justify-center items-center mt-2">
                         ยืนยันการเข้าพัก
                     </button>
                 </div>
@@ -207,8 +207,8 @@
             <input type="password" id="adminPassword" placeholder="รหัสผ่าน" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary focus:border-primary block p-3 outline-none transition mb-4 text-center text-xl tracking-widest font-mono">
             
             <div class="flex gap-3">
-                <button onclick="closeAdminModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg px-5 py-3 transition">ยกเลิก</button>
-                <button onclick="loginAdmin()" class="flex-1 bg-gray-800 hover:bg-black text-white font-medium rounded-lg px-5 py-3 transition">ยืนยัน</button>
+                <button onclick="closeAdminModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg px-5 py-3 transition-all duration-200 active:scale-95">ยกเลิก</button>
+                <button onclick="loginAdmin()" class="flex-1 bg-gray-800 hover:bg-black text-white font-medium rounded-lg px-5 py-3 transition-all duration-200 active:scale-95">ยืนยัน</button>
             </div>
         </div>
     </div>

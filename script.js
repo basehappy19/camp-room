@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initCountdown();
     await loadStudents();
     initEmptyRooms();
+    renderRoomSkeletons();
     
     // โหลดข้อมูลการจองจาก Supabase
     if(SUPABASE_URL) {
@@ -245,6 +246,38 @@ async function fetchBookings() {
     }
 }
 
+// Render Skeleton Rooms while loading
+function renderRoomSkeletons() {
+    const octupleContainer = document.getElementById('octuple-rooms-container');
+    const doubleContainer = document.getElementById('double-rooms-container');
+    
+    octupleContainer.innerHTML = '';
+    doubleContainer.innerHTML = '';
+    
+    const skeletonHTML = `
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-pulse h-28">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                <div class="h-4 bg-gray-200 rounded w-24"></div>
+                <div class="h-5 bg-gray-200 rounded-full w-10"></div>
+            </div>
+            <div class="p-4 bg-gray-50 flex justify-between items-center">
+                <div class="h-3 bg-gray-200 rounded w-16"></div>
+                <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+            </div>
+        </div>
+    `;
+
+    // 2 Octuple rooms
+    for (let i = 0; i < 2; i++) {
+        octupleContainer.innerHTML += skeletonHTML;
+    }
+
+    // 24 Double rooms
+    for (let i = 0; i < 24; i++) {
+        doubleContainer.innerHTML += skeletonHTML;
+    }
+}
+
 // Render Rooms to DOM
 function renderRooms() {
     const doubleContainer = document.getElementById('double-rooms-container');
@@ -253,7 +286,7 @@ function renderRooms() {
     doubleContainer.innerHTML = '';
     octupleContainer.innerHTML = '';
 
-    rooms.forEach(room => {
+    rooms.forEach((room, index) => {
         const isFull = room.occupants.length >= room.capacity;
         const isEmpty = room.occupants.length === 0;
         
@@ -286,7 +319,7 @@ function renderRooms() {
         }
 
         const roomHTML = `
-            <div onclick="openModal('${room.id}')" class="room-card ${stateClass} rounded-xl p-3 sm:p-4 cursor-pointer flex flex-col justify-between min-h-[8.5rem] relative overflow-hidden group">
+            <div onclick="openModal('${room.id}')" class="room-card ${stateClass} rounded-xl p-3 sm:p-4 cursor-pointer flex flex-col justify-between min-h-[8.5rem] relative overflow-hidden group animate-fade-in-up" style="animation-delay: ${(index % 12) * 50}ms;">
                 <div class="flex justify-between items-start gap-2">
                     <div class="flex-1">
                         <h4 class="font-bold text-gray-800 text-sm sm:text-base leading-tight">${room.title}</h4>
@@ -381,13 +414,13 @@ function renderOccupants() {
 
     container.innerHTML = currentSelectedRoom.occupants.map((occ, index) => {
         const isMale = occ.PrefixTitle === 'นาย';
-        const bgBadge = isMale ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600';
+        const genderColor = isMale ? 'bg-blue-500' : 'bg-pink-500';
         const genderIcon = isMale ? 'fa-mars' : 'fa-venus';
         
         return `
-            <div class="flex justify-between items-center bg-white border border-gray-100 p-3 rounded-lg shadow-sm">
+            <div class="flex justify-between items-center p-4 bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow animate-fade-in-up" style="animation-delay: ${index * 50}ms;">
                 <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full ${bgBadge} flex items-center justify-center mr-3">
+                    <div class="w-10 h-10 rounded-full ${genderColor} flex items-center justify-center text-white mr-4 shadow-inner">
                         <i class="fa-solid ${genderIcon}"></i>
                     </div>
                     <div>
