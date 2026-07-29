@@ -16,9 +16,43 @@ let rooms = [];
 let currentSelectedRoom = null;
 let currentPreviewStudent = null;
 let isFetching = false;
+let isBookingOpen = false;
+
+// 31 ก.ค. 2569 เวลา 20:00:00 น. (GMT+7)
+const BOOKING_START_TIME = new Date('2026-07-31T20:00:00+07:00').getTime();
+
+function initCountdown() {
+    const updateCountdown = () => {
+        const now = new Date().getTime();
+        const distance = BOOKING_START_TIME - now;
+
+        if (distance <= 0) {
+            isBookingOpen = true;
+            document.getElementById('countdown-section').classList.add('hidden');
+            return;
+        }
+
+        isBookingOpen = false;
+        document.getElementById('countdown-section').classList.remove('hidden');
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById('cd-days').innerText = days.toString().padStart(2, '0');
+        document.getElementById('cd-hours').innerText = hours.toString().padStart(2, '0');
+        document.getElementById('cd-minutes').innerText = minutes.toString().padStart(2, '0');
+        document.getElementById('cd-seconds').innerText = seconds.toString().padStart(2, '0');
+    };
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+    initCountdown();
     await loadStudents();
     initEmptyRooms();
     
@@ -209,14 +243,20 @@ function openModal(roomId) {
     renderOccupants();
     resetForm();
 
-    // Check if room is full
-    const isFull = currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity;
-    if (isFull) {
-        document.getElementById('bookingFormSection').classList.add('hidden');
-        document.getElementById('roomFullMessage').classList.remove('hidden');
+    // จัดการแสดงผลฟอร์มจอง หรือ แจ้งเตือนยังไม่เปิด
+    if (isBookingOpen) {
+        if (currentSelectedRoom.occupants.length >= currentSelectedRoom.capacity) {
+            document.getElementById('bookingFormSection').classList.add('hidden');
+            document.getElementById('roomFullMessage').classList.remove('hidden');
+        } else {
+            document.getElementById('bookingFormSection').classList.remove('hidden');
+            document.getElementById('roomFullMessage').classList.add('hidden');
+        }
+        document.getElementById('notOpenMessage').classList.add('hidden');
     } else {
-        document.getElementById('bookingFormSection').classList.remove('hidden');
+        document.getElementById('bookingFormSection').classList.add('hidden');
         document.getElementById('roomFullMessage').classList.add('hidden');
+        document.getElementById('notOpenMessage').classList.remove('hidden');
     }
 
     // Show Modal
@@ -265,9 +305,6 @@ function renderOccupants() {
                         <p class="text-xs text-gray-500">รหัส: ${occ.StdNo} | ม.${occ.class}</p>
                     </div>
                 </div>
-                <button onclick="removeOccupant('${occ.StdNo}')" class="text-red-400 hover:text-red-600 hover:bg-red-50 w-8 h-8 rounded-full transition flex items-center justify-center" title="ลบออก">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
             </div>
         `;
     }).join('');

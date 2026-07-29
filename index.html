@@ -50,6 +50,29 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
+        <!-- Countdown Section -->
+        <div id="countdown-section" class="mb-8 text-center bg-white p-6 rounded-2xl shadow-sm border border-emerald-100 hidden">
+            <h3 class="text-lg font-medium text-gray-700 mb-4">ระบบจองห้องพักจะเปิดในอีก</h3>
+            <div class="flex justify-center gap-3 sm:gap-4 text-center" id="countdown-timer">
+                <div class="bg-gray-50 px-3 sm:px-4 py-3 rounded-lg border border-gray-100 w-16 sm:w-20">
+                    <span id="cd-days" class="block text-xl sm:text-2xl font-bold text-primary">00</span>
+                    <span class="text-[10px] sm:text-xs text-gray-500">วัน</span>
+                </div>
+                <div class="bg-gray-50 px-3 sm:px-4 py-3 rounded-lg border border-gray-100 w-16 sm:w-20">
+                    <span id="cd-hours" class="block text-xl sm:text-2xl font-bold text-primary">00</span>
+                    <span class="text-[10px] sm:text-xs text-gray-500">ชั่วโมง</span>
+                </div>
+                <div class="bg-gray-50 px-3 sm:px-4 py-3 rounded-lg border border-gray-100 w-16 sm:w-20">
+                    <span id="cd-minutes" class="block text-xl sm:text-2xl font-bold text-primary">00</span>
+                    <span class="text-[10px] sm:text-xs text-gray-500">นาที</span>
+                </div>
+                <div class="bg-gray-50 px-3 sm:px-4 py-3 rounded-lg border border-gray-100 w-16 sm:w-20">
+                    <span id="cd-seconds" class="block text-xl sm:text-2xl font-bold text-primary">00</span>
+                    <span class="text-[10px] sm:text-xs text-gray-500">วินาที</span>
+                </div>
+            </div>
+        </div>
+
         <div class="mb-8 text-center">
             <h2 class="text-3xl font-bold text-gray-900 mb-2">เลือกห้องพัก</h2>
             <p class="text-gray-500">กรุณาคลิกที่ห้องพักเพื่อทำการจองหรือดูรายชื่อผู้เข้าพัก</p>
@@ -114,6 +137,15 @@
                 <hr class="mb-6 border-gray-100">
 
                 <!-- ฟอร์มจอง -->
+                <!-- แจ้งเตือนยังไม่เปิดจอง -->
+                <div id="notOpenMessage" class="hidden text-center py-8">
+                    <div class="w-16 h-16 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-clock text-2xl"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-1">ยังไม่เปิดให้จอง</h4>
+                    <p class="text-gray-500 text-sm">ระบบจะเปิดให้ลงชื่อในวันที่ 31 ก.ค. 2569 เวลา 20:00 น.</p>
+                </div>
+
                 <div id="bookingFormSection">
                     <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">เพิ่มผู้เข้าพักใหม่</h4>
                     
