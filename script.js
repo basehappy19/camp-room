@@ -515,7 +515,11 @@ async function confirmBooking() {
 
 // ลบผู้จองออกจาก Google Sheets
 async function removeOccupant(stdNo) {
-    if (isFetching || !confirm("ต้องการลบรายชื่อนี้ออกจากห้องพักหรือไม่?")) return;
+    if (!confirm("ต้องการลบรายชื่อนี้ออกจากห้องพักหรือไม่?")) return;
+    if (isFetching) {
+        showToast("ระบบกำลังอัปเดตข้อมูล กรุณารอสักครู่แล้วลองใหม่", "error");
+        return;
+    }
     
     showLoading(true);
     
