@@ -19,7 +19,7 @@ let currentSelectedRoom = null;
 let currentPreviewStudent = null;
 let isFetching = false;
 let isBookingOpen = false;
-let isAdmin = false;
+let isAdmin = localStorage.getItem('isAdmin') === 'true';
 
 // 31 ก.ค. 2569 เวลา 20:00:00 น. (GMT+7)
 const BOOKING_START_TIME = new Date('2026-07-31T20:00:00+07:00').getTime();
@@ -53,8 +53,13 @@ function initCountdown() {
     setInterval(updateCountdown, 1000);
 }
 
-// Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+    // Restore admin UI if logged in
+    if (isAdmin) {
+        document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
+        document.getElementById('adminBtn').classList.replace('text-gray-300', 'text-emerald-500');
+    }
+
     initCountdown();
     await loadStudents();
     initEmptyRooms();
@@ -110,6 +115,7 @@ function toggleAdminMode() {
     if (isAdmin) {
         customConfirm("ออกจากระบบ", "ต้องการออกจากโหมดผู้ดูแลระบบหรือไม่?", "info", () => {
             isAdmin = false;
+            localStorage.removeItem('isAdmin');
             document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock text-lg"></i>';
             document.getElementById('adminBtn').classList.replace('text-emerald-500', 'text-gray-300');
             showToast("ออกจากระบบผู้ดูแลแล้ว", "success");
@@ -156,6 +162,7 @@ async function loginAdmin() {
         
         if (data && data.length > 0 && pass.trim() === data[0].value.trim()) {
             isAdmin = true;
+            localStorage.setItem('isAdmin', 'true');
             closeAdminModal();
             document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
             document.getElementById('adminBtn').classList.replace('text-gray-300', 'text-emerald-500');
