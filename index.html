@@ -44,6 +44,9 @@
                     <h1 class="text-sm sm:text-lg md:text-2xl font-bold text-gray-900 leading-snug">จองห้องพักค่ายเสริมทักษะและการบูรณาการ ม.6 SMT & SME เทอมที่ 1/2569</h1>
                 </div>
                 <div class="flex items-center ml-2 sm:ml-4 shrink-0">
+                    <button onclick="exportCSV()" id="exportBtn" class="text-emerald-500 hover:text-emerald-600 transition p-2 hidden" title="ส่งออก CSV">
+                        <i class="fa-solid fa-file-csv text-xl"></i>
+                    </button>
                     <button onclick="toggleAdminMode()" id="adminBtn" class="text-gray-300 hover:text-gray-500 transition p-2" title="ผู้ดูแลระบบ">
                         <i class="fa-solid fa-lock text-lg"></i>
                     </button>

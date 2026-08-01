@@ -52,6 +52,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isAdmin) {
         document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
         document.getElementById('adminBtn').classList.replace('text-gray-300', 'text-emerald-500');
+        const exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) exportBtn.classList.remove('hidden');
     }
 
     initCountdown();
@@ -143,6 +145,8 @@ function toggleAdminMode() {
             localStorage.removeItem('isAdmin');
             document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock text-lg"></i>';
             document.getElementById('adminBtn').classList.replace('text-emerald-500', 'text-gray-300');
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) exportBtn.classList.add('hidden');
             showToast("ออกจากระบบผู้ดูแลแล้ว", "success");
             if(currentSelectedRoom) renderOccupants();
         });
@@ -193,6 +197,8 @@ async function loginAdmin() {
             closeAdminModal();
             document.getElementById('adminBtn').innerHTML = '<i class="fa-solid fa-lock-open text-lg"></i>';
             document.getElementById('adminBtn').classList.replace('text-gray-300', 'text-emerald-500');
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) exportBtn.classList.remove('hidden');
             showToast("เข้าสู่ระบบผู้ดูแลสำเร็จ", "success");
             
             if(currentSelectedRoom) {
@@ -716,3 +722,46 @@ function updateBodyScroll() {
 document.getElementById('studentId')?.addEventListener('keypress', function (e) {
     if (e.key === 'Enter') searchStudent();
 });
+
+// Export CSV
+function exportCSV() {
+    if (!isAdmin) return;
+
+    // Use BOM for Excel compatibility with Thai characters
+    let csvContent = "\uFEFF";
+    csvContent += "ห้อง,รหัสนักเรียน,คำนำหน้า,ชื่อ,นามสกุล,ชั้น,สถานะ\n";
+
+    // 1. Students who have booked
+    rooms.forEach(room => {
+        if (room.occupants && room.occupants.length > 0) {
+            room.occupants.forEach(student => {
+                csvContent += `"${room.title}","${student.StdNo}","${student.PrefixTitle}","${student.FName}","${student.LName}","6/${student.class}","จองแล้ว"\n`;
+            });
+        }
+    });
+
+    // 2. Students who haven't booked
+    const bookedStudentIds = new Set();
+    rooms.forEach(room => {
+        if (room.occupants) {
+            room.occupants.forEach(s => bookedStudentIds.add(s.StdNo));
+        }
+    });
+
+    studentsData.forEach(student => {
+        if (!bookedStudentIds.has(student.StdNo)) {
+            csvContent += `"ยังไม่จอง","${student.StdNo}","${student.PrefixTitle}","${student.FName}","${student.LName}","6/${student.class}","ยังไม่จอง"\n`;
+        }
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `room_booking_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
